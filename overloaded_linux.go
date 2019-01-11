@@ -6,6 +6,11 @@ import (
 	linuxproc "github.com/c9s/goprocinfo/linux"
 )
 
+var (
+	previousTotal uint64
+	previousIdle  uint64
+)
+
 func getCPULoad() float64 {
 	stat, err := linuxproc.ReadStat("/proc/stat")
 	if err != nil {
@@ -25,5 +30,11 @@ func getCPULoad() float64 {
 		idle += s.Idle
 	}
 
-	return 1 - float64(idle)/float64(total)
+	totalDiff := total - previousTotal
+	idleDiff := idle - previousIdle
+
+	previousTotal = total
+	previousIdle = idle
+
+	return 1 - float64(idleDiff)/float64(totalDiff)
 }
