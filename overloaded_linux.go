@@ -3,6 +3,8 @@
 package cpuload
 
 import (
+	"sync/atomic"
+
 	linuxproc "github.com/c9s/goprocinfo/linux"
 )
 
@@ -30,11 +32,11 @@ func getCPULoad() float64 {
 		idle += s.Idle
 	}
 
-	totalDiff := total - previousTotal
-	idleDiff := idle - previousIdle
+	totalDiff := total - atomic.LoadUint64(&previousTotal)
+	idleDiff := idle - atomic.LoadUint64(&previousIdle)
 
-	previousTotal = total
-	previousIdle = idle
+	atomic.StoreUint64(&previousTotal, total)
+	atomic.StoreUint64(&previousIdle, idle)
 
 	return 1 - float64(idleDiff)/float64(totalDiff)
 }
