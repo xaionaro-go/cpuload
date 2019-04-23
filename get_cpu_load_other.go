@@ -3,5 +3,5 @@
 package cpuload
 
 func getCPULoad() float64 {
-	return 0
+	panic("Not implemented")
 }
