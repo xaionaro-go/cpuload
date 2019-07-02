@@ -32,11 +32,8 @@ func getCPULoad() float64 {
 		idle += s.Idle
 	}
 
-	totalDiff := total - atomic.LoadUint64(&previousTotal)
-	idleDiff := idle - atomic.LoadUint64(&previousIdle)
-
-	atomic.StoreUint64(&previousTotal, total)
-	atomic.StoreUint64(&previousIdle, idle)
+	totalDiff := total - atomic.SwapUint64(&previousTotal, total)
+	idleDiff := idle - atomic.SwapUint64(&previousIdle, idle)
 
 	return 1 - float64(idleDiff)/float64(totalDiff)
 }
