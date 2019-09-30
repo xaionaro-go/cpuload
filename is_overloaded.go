@@ -25,6 +25,17 @@ func IsOverloadedFor(key string) bool {
 	return GetCPULoad() > limit
 }
 
+// OverloadedStateFor - returns current CPU usage and corresponding limit
+// for a given key. Used for custom logic to determine overloaded state.
+func OverloadedStateFor(key string) (current, limit float64) {
+	limit = defaultCPULoadLimit.Get()
+	if limitI, ok := limits.Load(key); ok {
+		limit = limitI.(float64)
+	}
+
+	return GetCPULoad(), limit
+}
+
 func IsOverloaded() bool {
 	return IsOverloadedFor(`everything_else`)
 }
