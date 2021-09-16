@@ -3,20 +3,21 @@
 package cpuload
 
 import (
+	"log"
+	"os"
 	"sync/atomic"
 
 	linuxproc "github.com/c9s/goprocinfo/linux"
 )
 
 var (
-	previousTotal uint64
-	previousIdle  uint64
+	ErrorLogger = log.New(os.Stderr, "[cpuload] ", 0)
 )
 
-func getCPULoad() float64 {
+func (m *Monitor) getAccumulatedCPULoad() float64 {
 	stat, err := linuxproc.ReadStat("/proc/stat")
 	if err != nil {
-		ErrorLogger.Printf("getCPULoad(): %v", err)
+		ErrorLogger.Printf("getAccumulatedCPULoad(): %v", err)
 		return -1
 	}
 
@@ -32,8 +33,8 @@ func getCPULoad() float64 {
 		idle += s.Idle
 	}
 
-	totalDiff := total - atomic.SwapUint64(&previousTotal, total)
-	idleDiff := idle - atomic.SwapUint64(&previousIdle, idle)
+	totalDiff := total - atomic.SwapUint64(&m.previousTotal, total)
+	idleDiff := idle - atomic.SwapUint64(&m.previousIdle, idle)
 
 	return 1 - float64(idleDiff)/float64(totalDiff)
 }
